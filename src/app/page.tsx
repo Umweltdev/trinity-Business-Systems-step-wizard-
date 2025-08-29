@@ -1214,6 +1214,7 @@ const App = () => {
       if (trinitySelectionId) savings += 500; // Base value for having any Trinity system
       if (trinitySelectionId === "trinity-plus") savings += 700; // Additional value for plus
       return savings;
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedGoals, trinitySelectionId]);
 
     const breakEvenMonths =
@@ -1267,7 +1268,7 @@ const App = () => {
     // New function to navigate to TrinityPackages step
     const goToTrinityPackages = () => {
       const steps = getSteps();
-      let targetStep = solutionType === "trinity" ? 2 : 3; // Step 2 for "trinity", Step 3 for "both"
+      const targetStep = solutionType === "trinity" ? 2 : 3; // Step 2 for "trinity", Step 3 for "both"
       setCurrentStep(targetStep);
       window.scrollTo(0, 0);
     };
@@ -1279,7 +1280,7 @@ const App = () => {
             Your Custom Solution Summary
           </h2>
           <p className="text-gray-600 text-lg">
-            Here's your complete business transformation package - ready to
+            Here&apos;s your complete business transformation package - ready to
             launch!
           </p>
         </div>
