@@ -354,11 +354,12 @@ const App = () => {
   );
   // --- AUTO-ADVANCE LOGIC ---
   // Move from Start -> next step automatically when a type is chosen
-  useEffect(() => {
-    if (currentStep === 1 && solutionType) {
-      setCurrentStep(2);
-    }
-  }, [solutionType, currentStep]);
+
+  // useEffect(() => {
+  //   if (currentStep === 1 && solutionType) {
+  //     setCurrentStep(2);
+  //   }
+  // }, [solutionType, currentStep]);
 
   // Move from Trinity Package -> next step automatically when a package is selected
   // (moved below nextStep definition to avoid temporal dead zone)
@@ -471,11 +472,11 @@ const App = () => {
   }, [currentStep, solutionType, trinitySelectionId]);
 
   // Move from Trinity Package -> next step automatically when a package is selected
-  useEffect(() => {
-    if (solutionType === "trinity" && currentStep === 2 && trinitySelectionId) {
-      nextStep();
-    }
-  }, [solutionType, currentStep, trinitySelectionId, nextStep]);
+  // useEffect(() => {
+  //   if (solutionType === "trinity" && currentStep === 2 && trinitySelectionId) {
+  //     nextStep();
+  //   }
+  // }, [solutionType, currentStep, trinitySelectionId, nextStep]);
 
   // Reset Function
   const resetSelections = () => {
@@ -573,7 +574,7 @@ const App = () => {
     };
 
     return (
-      <div className="animate-fadeIn flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto p-8 ">
+      <div className="animate-fadeIn w-full flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto p-8 ">
         {/* Left Content Section */}
         <div className="md:w-1/2 text-left mb-8 md:mb-0 md:pr-10">
           <div className="flex items-center mb-6">
@@ -654,7 +655,7 @@ const App = () => {
   };
 
   const TrinityPackages = () => (
-    <div className="animate-fadeIn">
+    <div className="animate-fadeIn w-full">
       {/* Label */}
       <div className="inline-block px-5 py-1.5 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 text-purple-700 rounded-full text-sm font-bold mb-6 border border-purple-500/30 shadow-sm tracking-wide">
         ✨ Trinity Systems Selection
@@ -681,19 +682,26 @@ const App = () => {
             ends in {betaDaysRemaining} days!
           </p>
         </div>
-        <div className="inline-flex items-center gap-6 px-6 py-3 bg-gradient-to-r from-red-500/10 via-red-400/5 to-red-500/10 border border-red-500/40 rounded-xl shadow-sm">
-          <span className="text-red-600 font-bold text-sm tracking-wide animate-pulse">
-            🔥 BETA PRICING ACTIVE
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="inline-flex items-center gap-4 px-4 py-2 bg-gradient-to-r from-red-600/10 via-red-500/5 to-red-600/10 border border-red-500/30 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
+          role="alert"
+          aria-label={`Beta pricing active, ${betaDaysRemaining} days remaining`}
+        >
+          <span className="text-red-600 font-semibold text-sm uppercase tracking-wide animate-pulse">
+            🔥 Beta Pricing
           </span>
           <div className="text-center">
-            <div className="text-red-600 font-extrabold text-2xl">
+            <div className="text-red-600 font-bold text-lg">
               {betaDaysRemaining}
             </div>
-            <div className="text-xs text-gray-600 uppercase tracking-wider">
-              Days Remaining
+            <div className="text-xs text-gray-500 uppercase tracking-wide">
+              Days Left
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Options Grid */}
@@ -834,14 +842,14 @@ const App = () => {
         </button>
         <button
           className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full font-semibold flex items-center gap-2 shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-          disabled
+          onClick={nextStep}
+          disabled={!trinitySelectionId}
         >
-          Auto-advancing…
+          Continue <ChevronRight className="w-4 h-4" />
         </button>
       </div>
     </div>
   );
-
   const StoreType = () => {
     const needsStoreInfo =
       trinitySelectionId === "trinity-plus" || trinitySelectionId === "garo";
@@ -850,15 +858,7 @@ const App = () => {
       if (!needsStoreInfo) {
         nextStep();
       }
-    }, [needsStoreInfo]);
-
-    // When store info is needed, auto-advance once user selects an option
-    useEffect(() => {
-      if (needsStoreInfo && hasPhysicalStore !== null) {
-        nextStep();
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [needsStoreInfo, hasPhysicalStore, nextStep]);
+    }, [needsStoreInfo, nextStep]);
 
     if (!needsStoreInfo) {
       return null;
@@ -870,7 +870,7 @@ const App = () => {
     const basePrice = trinitySelection ? trinitySelection.betaPrice : 0;
 
     return (
-      <div className="animate-fadeIn">
+      <div className="animate-fadeIn w-full">
         <div className="inline-block px-4 py-1 bg-gradient-to-r from-purple-500/15 to-cyan-500/15 text-purple-600 rounded-full text-sm font-semibold mb-4 border border-purple-500/30">
           Business Type
         </div>
@@ -881,53 +881,99 @@ const App = () => {
           This affects GARO system setup requirements.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div
-            className={`bg-white/80 backdrop-blur-xl rounded-2xl p-6 cursor-pointer transition-all duration-300 border-2 ${
+          {/* E-commerce Only Card */}
+          <motion.div
+            className={`group relative rounded-2xl p-6 cursor-pointer transition-all duration-300 border-2 shadow-lg hover:shadow-xl ${
               hasPhysicalStore === false
-                ? "border-blue-500 bg-white"
-                : "border-gray-200 hover:border-blue-200 hover:bg-white hover:-translate-y-1"
+                ? "border-blue-500 bg-gradient-to-br from-blue-50/80 to-cyan-50/80 ring-2 ring-blue-200/50"
+                : "border-gray-200 bg-white/90 hover:border-blue-300 hover:bg-white"
             }`}
+            whileHover={{ y: -5 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setHasPhysicalStore(false)}
           >
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500/15 to-purple-500/15 rounded-xl flex items-center justify-center mb-4">
-              <Wifi className="w-8 h-8 text-blue-500" />
+            {/* Selection indicator */}
+            {hasPhysicalStore === false && (
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center shadow-md">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            )}
+
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl flex items-center justify-center mb-4 backdrop-blur-sm">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-md">
+                <Wifi className="w-6 h-6 text-white" />
+              </div>
             </div>
+
             <h3 className="text-xl font-semibold mb-2 text-slate-900">
               E-commerce Only
             </h3>
             <p className="text-slate-600 text-sm mb-4">
-              Online business without a physical location.
+              Online business without a physical location. Perfect for digital
+              products and services.
             </p>
-            <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+
+            <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
               €{basePrice.toLocaleString()}
             </div>
-            <p className="text-emerald-600 text-sm mt-2">Standard API setup</p>
-          </div>
+            <p className="text-blue-600 text-sm mt-2 flex items-center">
+              <Check className="w-4 h-4 mr-1" /> Standard API setup included
+            </p>
 
-          <div
-            className={`bg-white/80 backdrop-blur-xl rounded-2xl p-6 cursor-pointer transition-all duration-300 border-2 ${
+            {/* Hover indicator */}
+            {hasPhysicalStore !== false && (
+              <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <ChevronRight className="w-5 h-5 text-blue-400" />
+              </div>
+            )}
+          </motion.div>
+
+          {/* Physical Storefront Card */}
+          <motion.div
+            className={`group relative rounded-2xl p-6 cursor-pointer transition-all duration-300 border-2 shadow-lg hover:shadow-xl ${
               hasPhysicalStore === true
-                ? "border-blue-500 bg-white"
-                : "border-gray-200 hover:border-blue-200 hover:bg-white hover:-translate-y-1"
+                ? "border-amber-500 bg-gradient-to-br from-amber-50/80 to-orange-50/80 ring-2 ring-amber-200/50"
+                : "border-gray-200 bg-white/90 hover:border-amber-300 hover:bg-white"
             }`}
+            whileHover={{ y: -5 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setHasPhysicalStore(true)}
           >
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500/15 to-purple-500/15 rounded-xl flex items-center justify-center mb-4">
-              <Building className="w-8 h-8 text-blue-500" />
+            {/* Selection indicator */}
+            {hasPhysicalStore === true && (
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center shadow-md">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+            )}
+
+            <div className="w-16 h-16 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-xl flex items-center justify-center mb-4 backdrop-blur-sm">
+              <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center shadow-md">
+                <Building className="w-6 h-6 text-white" />
+              </div>
             </div>
+
             <h3 className="text-xl font-semibold mb-2 text-slate-900">
               Physical Storefront
             </h3>
             <p className="text-slate-600 text-sm mb-4">
-              Brick-and-mortar with inventory.
+              Brick-and-mortar with inventory. Ideal for retail shops,
+              restaurants, and showrooms.
             </p>
-            <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+
+            <div className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
               €{(basePrice + 1600).toLocaleString()}
             </div>
             <p className="text-amber-600 text-sm mt-2">
               +€1,600 Square setup & training
             </p>
-          </div>
+
+            {/* Hover indicator */}
+            {hasPhysicalStore !== true && (
+              <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <ChevronRight className="w-5 h-5 text-amber-400" />
+              </div>
+            )}
+          </motion.div>
         </div>
 
         <div className="flex gap-4">
@@ -950,7 +996,7 @@ const App = () => {
   };
 
   const IndustryStep = () => (
-    <div className="animate-fadeIn">
+    <div className="animate-fadeIn w-full">
       <div className="inline-block px-4 py-1 bg-gradient-to-r from-purple-500/15 to-cyan-500/15 text-purple-600 rounded-full text-sm font-semibold mb-4 border border-purple-500/30">
         Industry
       </div>
@@ -1008,7 +1054,7 @@ const App = () => {
       );
     };
     return (
-      <div className="animate-fadeIn">
+      <div className="animate-fadeIn w-full">
         <div className="inline-block px-4 py-1 bg-gradient-to-r from-purple-500/15 to-cyan-500/15 text-purple-600 rounded-full text-sm font-semibold mb-4 border border-purple-500/30">
           Goals
         </div>
@@ -1088,7 +1134,7 @@ const App = () => {
 
   const PlatformTier = () => {
     return (
-      <div className="animate-fadeIn">
+      <div className="animate-fadeIn w-full">
         <div className="inline-block px-4 py-1 bg-gradient-to-r from-purple-500/15 to-cyan-500/15 text-purple-600 rounded-full text-sm font-semibold mb-4 border border-purple-500/30">
           Platform
         </div>
@@ -1178,23 +1224,25 @@ const App = () => {
     if (estimatedMonthlySavings === 0) return null;
 
     return (
-      <div className="mt-8 bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-green-500/30">
-        <h3 className="text-xl font-semibold mb-4 text-white flex items-center gap-2">
-          <TrendingUp className="text-green-400" />
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-200 shadow-md">
+        <h3 className="text-xl font-semibold mb-4 text-gray-900 flex items-center gap-2">
+          <TrendingUp className="text-blue-500" />
           Estimated Return on Investment
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
           <div>
-            <p className="text-3xl font-bold text-green-400">
+            <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               €{estimatedMonthlySavings.toLocaleString()}
             </p>
-            <p className="text-gray-400 text-sm">Estimated Monthly Savings</p>
+            <p className="text-gray-600 text-sm mt-1">
+              Estimated Monthly Savings
+            </p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-green-400">
+            <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               {breakEvenMonths}
             </p>
-            <p className="text-gray-400 text-sm">Months to Break Even</p>
+            <p className="text-gray-600 text-sm mt-1">Months to Break Even</p>
           </div>
         </div>
         <p className="text-xs text-gray-500 mt-4 text-center">
@@ -1216,33 +1264,43 @@ const App = () => {
     const isBundle = solutionType === "both" && trinitySelection && tier;
     const discountedTotal = isBundle ? Math.round(total * 0.9) : total;
 
+    // New function to navigate to TrinityPackages step
+    const goToTrinityPackages = () => {
+      const steps = getSteps();
+      let targetStep = solutionType === "trinity" ? 2 : 3; // Step 2 for "trinity", Step 3 for "both"
+      setCurrentStep(targetStep);
+      window.scrollTo(0, 0);
+    };
+
     return (
-      <div className="animate-fadeIn">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-2 text-gray-900">
+      <div className="animate-fadeIn w-full">
+        <div className="text-center mb-10">
+          <h2 className="text-4xl font-bold mb-3 text-gray-900">
             Your Custom Solution Summary
           </h2>
-          <p className="text-gray-600">
-            Here is a complete overview of your selections. Ready to proceed?
+          <p className="text-gray-600 text-lg">
+            Here's your complete business transformation package - ready to
+            launch!
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 border border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+        <div className="bg-white rounded-3xl p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
             {/* Column 1: Selections */}
             <div>
-              <h4 className="font-semibold text-lg mb-3 text-gray-900 border-b border-gray-200 pb-2">
+              <h4 className="font-semibold text-xl mb-4 text-gray-900 border-b border-gray-200 pb-3 flex items-center">
+                <Check className="w-5 h-5 mr-2 text-blue-500" />
                 Your Selections
               </h4>
-              <ul className="space-y-2 text-sm">
-                <li className="flex justify-between items-center">
-                  <span className="text-gray-600">Start:</span>
-                  <span className="text-gray-900 font-medium capitalize bg-gray-100 px-2 py-1 rounded">
+              <ul className="space-y-3">
+                <li className="flex justify-between items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <span className="text-gray-600">Solution Type:</span>
+                  <span className="text-gray-900 font-medium capitalize bg-blue-100 px-3 py-1.5 rounded-full text-sm">
                     {solutionType}
                   </span>
                 </li>
                 {industry && (
-                  <li className="flex justify-between items-center">
+                  <li className="flex justify-between items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                     <span className="text-gray-600">Industry:</span>
                     <span className="text-gray-900 font-medium">
                       {industry.name}
@@ -1250,7 +1308,7 @@ const App = () => {
                   </li>
                 )}
                 {trinitySelection && (
-                  <li className="flex justify-between items-center">
+                  <li className="flex justify-between items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                     <span className="text-gray-600">Trinity System:</span>
                     <span className="text-gray-900 font-medium">
                       {trinitySelection.name}
@@ -1258,15 +1316,15 @@ const App = () => {
                   </li>
                 )}
                 {tier && (
-                  <li className="flex justify-between items-center">
+                  <li className="flex justify-between items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                     <span className="text-gray-600">Platform Tier:</span>
                     <span className="text-gray-900 font-medium">
                       {tier.name}
                     </span>
                   </li>
                 )}
-                <li className="flex justify-between items-center">
-                  <span className="text-gray-600">Budget:</span>
+                <li className="flex justify-between items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                  <span className="text-gray-600">Your Budget:</span>
                   <span className="text-gray-900 font-medium">
                     ~€{budget.toLocaleString()}
                   </span>
@@ -1275,17 +1333,18 @@ const App = () => {
             </div>
 
             {/* Column 2: Cost Breakdown */}
-            <div>
-              <h4 className="font-semibold text-lg mb-3 text-gray-900 border-b border-gray-200 pb-2">
-                Cost Breakdown
+            <div className="flex flex-col gap-4 justify-between">
+              <h4 className="font-semibold text-xl mb-4 text-gray-900 border-b border-gray-200 pb-3 flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2 text-purple-500" />
+                Investment Breakdown
               </h4>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-3">
                 {trinitySelection && (
-                  <div className="flex justify-between py-2 border-b border-gray-200">
+                  <div className="flex justify-between items-center py-2.5 px-3 border-b border-gray-100 hover:bg-gray-50 rounded-lg transition-colors">
                     <span className="text-gray-600">
                       {trinitySelection.name}
                     </span>
-                    <span className="text-gray-900">
+                    <span className="text-gray-900 font-medium">
                       €{trinitySelection.betaPrice.toLocaleString()}
                     </span>
                   </div>
@@ -1293,28 +1352,30 @@ const App = () => {
                 {hasPhysicalStore &&
                   (trinitySelectionId === "trinity-plus" ||
                     trinitySelectionId === "garo") && (
-                    <div className="flex justify-between py-2 border-b border-gray-200">
+                    <div className="flex justify-between items-center py-2.5 px-3 border-b border-gray-100 hover:bg-gray-50 rounded-lg transition-colors">
                       <span className="text-gray-600">Storefront Setup</span>
-                      <span className="text-gray-900">€1,600</span>
+                      <span className="text-gray-900 font-medium">€1,600</span>
                     </div>
                   )}
                 {tier && (
-                  <div className="flex justify-between py-2 border-b border-gray-200">
+                  <div className="flex justify-between items-center py-2.5 px-3 border-b border-gray-100 hover:bg-gray-50 rounded-lg transition-colors">
                     <span className="text-gray-600">{tier.name} Platform</span>
-                    <span className="text-gray-900">
+                    <span className="text-gray-900 font-medium">
                       €{((tier.minPrice + tier.maxPrice) / 2).toLocaleString()}
                     </span>
                   </div>
                 )}
                 {isBundle && (
-                  <div className="flex justify-between py-2 border-b border-gray-200 text-green-600">
-                    <span>Bundle Discount (10%)</span>
-                    <span>-€{Math.round(total * 0.1).toLocaleString()}</span>
+                  <div className="flex justify-between items-center py-2.5 px-3 border-b border-gray-100 bg-blue-50 text-blue-700 rounded-lg">
+                    <span className="font-medium">Bundle Discount (10%)</span>
+                    <span className="font-bold">
+                      -€{Math.round(total * 0.1).toLocaleString()}
+                    </span>
                   </div>
                 )}
-                <div className="flex justify-between pt-4 text-lg font-bold">
+                <div className="flex justify-between items-center pt-5 px-3 text-xl font-bold mt-4 bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl">
                   <span className="text-gray-900">Total Investment</span>
-                  <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent text-2xl">
                     €{discountedTotal.toLocaleString()}
                   </span>
                 </div>
@@ -1325,23 +1386,38 @@ const App = () => {
 
         <ROICalculator />
 
-        <div className="flex gap-4 mt-8">
+        <div className="flex flex-col sm:flex-row gap-4 mt-10">
           <button
-            onClick={prevStep}
-            className="px-8 py-3 border border-gray-300 text-gray-700 rounded-full font-semibold flex items-center gap-2 hover:bg-gray-100 transition-all"
+            onClick={goToTrinityPackages}
+            className="px-8 py-3.5 border border-gray-300 text-gray-700 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-gray-50 transition-all hover:shadow-sm"
+            aria-label="Go back to adjust Trinity package selection"
           >
-            <ChevronLeft className="w-4 h-4" /> Back
+            <ChevronLeft className="w-4 h-4" /> Back to Adjust
           </button>
           <button
             onClick={() =>
               showToastMessage(
-                "Your quote has been submitted! We'll be in touch."
+                "Your quote has been submitted! We'll be in touch within 24 hours."
               )
             }
-            className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full font-semibold hover:shadow-lg hover:shadow-green-500/25 transition-all"
+            className="flex-1 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-bold hover:shadow-xl hover:shadow-blue-400/30 transition-all flex items-center justify-center group"
           >
-            Finalize & Get Quote →
+            Secure This Pricing Now →
+            <span className="ml-2 inline-block group-hover:translate-x-1 transition-transform">
+              <ChevronRight className="w-5 h-5" />
+            </span>
           </button>
+        </div>
+
+        {/* Limited Time Offer Banner */}
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl text-center">
+          <p className="text-blue-800 font-medium flex items-center justify-center">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-white mr-2">
+              ⚡
+            </span>
+            Beta pricing locked in for 30 days - submit now to guarantee these
+            rates!
+          </p>
         </div>
       </div>
     );
@@ -1469,14 +1545,15 @@ const App = () => {
                     <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900 text-white">
                       <RefreshCw size={12} />
                     </span>
-                    Reset steps
+                    {/* Hide text on mobile, show on md+ */}
+                    <span className="hidden md:inline">Reset steps</span>
                   </button>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="max-w-6xl mx-auto animate-fadeIn flex flex-col md:flex-row items-center justify-between p-8 mb-10 bg-white/90 backdrop-blur rounded-2xl shadow-xl">
+          <div className="max-w-6xl mx-auto animate-fadeIn w-full flex flex-col md:flex-row items-center justify-between p-8 mb-10 bg-white/90 backdrop-blur rounded-2xl shadow-xl">
             {renderStepContent()}
           </div>
         </div>
@@ -1513,7 +1590,7 @@ const App = () => {
         .animate-slideIn {
           animation: slideIn 0.3s ease;
         }
-        .animate-fadeIn {
+        .animate-fadeIn w-full {
           animation: fadeIn 0.5s ease;
         }
         input[type="range"]::-webkit-slider-thumb {
