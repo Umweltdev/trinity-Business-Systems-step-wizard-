@@ -568,16 +568,15 @@ const App = () => {
 
   const SolutionChoice = () => {
     const handleStartBuilding = () => {
+      // Update state and navigate in sequence
       setSolutionType("trinity");
       setHasStarted(true);
-    };
 
-    // Add this effect to handle navigation after state updates
-    useEffect(() => {
-      if (solutionType === "trinity" && hasStarted && currentStep === 1) {
-        nextStep();
-      }
-    }, [solutionType, hasStarted, currentStep, nextStep]);
+      // Use a microtask to ensure state updates are processed first
+      Promise.resolve().then(() => {
+        setCurrentStep(2); // Navigate directly to step 2
+      });
+    };
 
     return (
       <div className="animate-fadeIn w-full flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto p-8 ">
