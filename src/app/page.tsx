@@ -446,7 +446,10 @@ const App = () => {
       let nextStepNum = currentStep + 1;
 
       const needsStoreInfo =
-        trinitySelectionId === "trinity-plus" || trinitySelectionId === "garo";
+        trinitySelectionId === "trinity-plus" ||
+        trinitySelectionId === "garo" ||
+        trinitySelectionId === "trinity-core";
+
       if (solutionType === "trinity" && nextStepNum === 3 && !needsStoreInfo) {
         nextStepNum++;
       }
@@ -456,12 +459,16 @@ const App = () => {
     }
   }, [currentStep, getSteps, solutionType, trinitySelectionId]);
 
+  // Update the prevStep function similarly
   const prevStep = useCallback(() => {
     if (currentStep > 1) {
       let prevStepNum = currentStep - 1;
 
       const needsStoreInfo =
-        trinitySelectionId === "trinity-plus" || trinitySelectionId === "garo";
+        trinitySelectionId === "trinity-plus" ||
+        trinitySelectionId === "garo" ||
+        trinitySelectionId === "trinity-core";
+
       if (solutionType === "trinity" && prevStepNum === 3 && !needsStoreInfo) {
         prevStepNum--;
       }
@@ -856,8 +863,11 @@ const App = () => {
     </div>
   );
   const StoreType = () => {
+    // Update this condition to include trinity-core as well
     const needsStoreInfo =
-      trinitySelectionId === "trinity-plus" || trinitySelectionId === "garo";
+      trinitySelectionId === "trinity-plus" ||
+      trinitySelectionId === "garo" ||
+      trinitySelectionId === "trinity-core";
 
     useEffect(() => {
       if (!needsStoreInfo) {
@@ -1541,7 +1551,7 @@ const App = () => {
                 );
               })}
             {hasStarted && (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+              <div className="absolute right-4 top-2/3 md:top-1/2 -translate-y-1/2">
                 <div className="rounded-full p-[2px] bg-gradient-to-r from-blue-500/50 to-purple-600/50 shadow-[0_1px_12px_rgba(99,102,241,0.25)]">
                   <button
                     onClick={resetSelections}
