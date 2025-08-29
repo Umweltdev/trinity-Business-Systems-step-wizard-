@@ -570,8 +570,14 @@ const App = () => {
     const handleStartBuilding = () => {
       setSolutionType("trinity");
       setHasStarted(true);
-      nextStep();
     };
+
+    // Add this effect to handle navigation after state updates
+    useEffect(() => {
+      if (solutionType === "trinity" && hasStarted && currentStep === 1) {
+        nextStep();
+      }
+    }, [solutionType, hasStarted, currentStep, nextStep]);
 
     return (
       <div className="animate-fadeIn w-full flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto p-8 ">
